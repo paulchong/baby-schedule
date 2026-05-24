@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Baby Routine Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #faf9f7;
+      --bg2:        #f2f0ec;
+      --bg3:        #e8e5df;
+      --surface:    #ffffff;
+      --border:     #dedad3;
+      --border2:    #ccc8bf;
+      --text:       #1a1916;
+      --text2:      #6b6760;
+      --text3:      #a09c96;
+      --accent:     #c45c2e;
+      --accent2:    #e07a4f;
+
+      --nap:        #4a7fa5;
+      --nap-bg:     #e8f1f8;
+      --nap-border: #b8d4e8;
+
+      --wake:       #d4973a;
+      --wake-bg:    #fdf3e3;
+      --wake-border:#f0d090;
+
+      --feed:       #5a9e6f;
+      --feed-bg:    #e8f5ec;
+      --feed-border:#b8dfc4;
+
+      --night:      #6b5fa0;
+      --night-bg:   #f0edf8;
+      --night-border:#c8bfe8;
+
+      --nfeed:      #b55080;
+      --nfeed-bg:   #fceef5;
+      --nfeed-border:#e8b8d0;
+
+      --radius:     6px;
+      --radius-lg:  10px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:         #141412;
+        --bg2:        #1e1c19;
+        --bg3:        #28261f;
+        --surface:    #1e1c19;
+        --border:     #2e2c25;
+        --border2:    #3a3830;
+        --text:       #f0ede8;
+        --text2:      #908c84;
+        --text3:      #5a5750;
+
+        --nap-bg:     #1a2a38;
+        --nap-border: #2a4a68;
+
+        --wake-bg:    #2e2010;
+        --wake-border:#5a3e18;
+
+        --feed-bg:    #182a20;
+        --feed-border:#2a5038;
+
+        --night-bg:   #1e1a30;
+        --night-border:#3a3060;
+
+        --nfeed-bg:   #2a1020;
+        --nfeed-border:#602040;
+      }
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      grid-template-rows: auto 1fr;
+    }
+
+    /* Header */
+    header {
+      grid-column: 1 / -1;
+      padding: 20px 28px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      background: var(--surface);
+    }
+    header h1 {
+      font-size: 18px;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    header p {
+      font-size: 13px;
+      color: var(--text3);
+    }
+    .logo-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+      margin-right: 8px;
+      flex-shrink: 0;
+      position: relative;
+      top: -1px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      grid-column: 1;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 0 0 40px;
+    }
+
+    .section {
+      padding: 16px 24px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section:last-child { border-bottom: none; }
+
+    .section-title {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 12px;
+    }
+
+    .ctrl {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      min-width: 0;
+    }
+    .ctrl:last-child { margin-bottom: 0; }
+    .ctrl label {
+      font-size: 12px;
+      color: var(--text2);
+      width: 120px;
+      flex-shrink: 0;
+    }
+    .ctrl input[type=range] {
+      flex: 1;
+      height: 3px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--border2);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+    .ctrl input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+    .ctrl input[type=range]::-moz-range-thumb {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: none;
+    }
+    .ctrl .val {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text);
+      width: 70px;
+      min-width: 70px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* Feeds */
+    .feed-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+      padding: 7px 8px;
+      background: var(--bg2);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    .feed-item select {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      padding: 2px 4px;
+      cursor: pointer;
+      outline: none;
+    }
+    .feed-item select:focus { border-color: var(--accent); }
+    .feed-item .feed-offset {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--text3);
+      min-width: 36px;
+      text-align: right;
+    }
+    .feed-item input[type=range] {
+      width: 50px;
+      height: 3px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--border2);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+    .feed-item input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--feed);
+      cursor: pointer;
+    }
+    .feed-item .feed-time {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--feed);
+      min-width: 52px;
+      text-align: right;
+    }
+    .feed-del {
+      background: none;
+      border: none;
+      color: var(--text3);
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      padding: 0 2px;
+      border-radius: 3px;
+    }
+    .feed-del:hover { color: var(--accent); background: var(--bg3); }
+
+    .add-feed-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      background: none;
+      border: 1px dashed var(--border2);
+      border-radius: var(--radius);
+      color: var(--text2);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      padding: 6px 10px;
+      width: 100%;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .add-feed-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Main / Timeline */
+    .main {
+      padding: 24px 28px;
+      overflow-x: auto;
+      overflow-y: auto;
+    }
+
+    .tl-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+      padding-left: 88px;
+    }
+    .tl-tick {
+      font-size: 10px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      flex: none;
+      border-left: 1px solid var(--border);
+      padding: 0 0 4px 3px;
+    }
+
+    .tl-row {
+      display: flex;
+      align-items: center;
+      height: 38px;
+      margin-bottom: 3px;
+    }
+    .tl-label {
+      width: 88px;
+      flex-shrink: 0;
+      font-size: 11px;
+      color: var(--text3);
+      text-align: right;
+      padding-right: 12px;
+      font-family: 'DM Mono', monospace;
+    }
+    .tl-body {
+      flex: 1;
+      position: relative;
+      height: 100%;
+      min-width: 600px;
+    }
+    .tl-grid-line {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 1px;
+      background: var(--border);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    .tl-block {
+      position: absolute;
+      top: 5px; bottom: 5px;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 500;
+      overflow: hidden;
+      white-space: nowrap;
+      cursor: default;
+      transition: left 0.2s, width 0.2s;
+    }
+    .b-wake  { background: var(--wake-bg);  color: var(--wake);  border: 1px solid var(--wake-border); }
+    .b-nap   { background: var(--nap-bg);   color: var(--nap);   border: 1px solid var(--nap-border); }
+    .b-feed  { background: var(--feed-bg);  color: var(--feed);  border: 1px solid var(--feed-border); }
+    .b-night { background: var(--night-bg); color: var(--night); border: 1px solid var(--night-border); }
+    .b-nfeed { background: var(--nfeed-bg); color: var(--nfeed); border: 1px solid var(--nfeed-border); }
+
+    .tl-timestamps {
+      display: flex;
+      align-items: flex-start;
+      height: 28px;
+      margin-top: 4px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text2);
+    }
+    .legend-swatch {
+      width: 10px; height: 10px;
+      border-radius: 2px;
+    }
+    .sw-wake  { background: var(--wake-bg);  border: 1px solid var(--wake-border); }
+    .sw-nap   { background: var(--nap-bg);   border: 1px solid var(--nap-border); }
+    .sw-feed  { background: var(--feed-bg);  border: 1px solid var(--feed-border); }
+    .sw-night { background: var(--night-bg); border: 1px solid var(--night-border); }
+    .sw-nfeed { background: var(--nfeed-bg); border: 1px solid var(--nfeed-border); }
+
+    .note {
+      margin-top: 12px;
+      font-size: 11px;
+      color: var(--text3);
+      line-height: 1.7;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: fixed;
+      background: var(--text);
+      color: var(--bg);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      padding: 5px 9px;
+      border-radius: 5px;
+      pointer-events: none;
+      z-index: 100;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+
+    @media (max-width: 720px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { grid-column: 1; border-right: none; border-bottom: 1px solid var(--border); }
+      .main { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <h1><span class="logo-dot"></span>Baby Routine Planner</h1>
+    <p>Drag the sliders — everything cascades automatically</p>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+
+    <div class="section">
+      <p class="section-title">Morning</p>
+      <div class="ctrl">
+        <label>Wake time</label>
+        <input type="range" id="s-wake" min="300" max="480" value="390" step="5">
+        <span class="val" id="v-wake"></span>
+      </div>
+    </div>
+
+    <div class="section">
+      <p class="section-title">Wake windows</p>
+      <div class="ctrl"><label>Wake → Nap 1</label><input type="range" id="s-w1" min="30" max="150" value="90" step="5"><span class="val" id="v-w1"></span></div>
+      <div class="ctrl"><label>Nap 1 → Nap 2</label><input type="range" id="s-w2" min="30" max="150" value="90" step="5"><span class="val" id="v-w2"></span></div>
+      <div class="ctrl"><label>Nap 2 → Nap 3</label><input type="range" id="s-w3" min="30" max="150" value="90" step="5"><span class="val" id="v-w3"></span></div>
+      <div class="ctrl"><label>Nap 3 → Bed</label><input type="range" id="s-w4" min="30" max="180" value="120" step="5"><span class="val" id="v-w4"></span></div>
+    </div>
+
+    <div class="section">
+      <p class="section-title">Nap lengths</p>
+      <div class="ctrl"><label>Nap 1</label><input type="range" id="s-n1" min="15" max="120" value="105" step="5"><span class="val" id="v-n1"></span></div>
+      <div class="ctrl"><label>Nap 2</label><input type="range" id="s-n2" min="15" max="120" value="75" step="5"><span class="val" id="v-n2"></span></div>
+      <div class="ctrl"><label>Nap 3</label><input type="range" id="s-n3" min="15" max="120" value="60" step="5"><span class="val" id="v-n3"></span></div>
+    </div>
+
+    <div class="section">
+      <p class="section-title">Night sleep</p>
+      <div class="ctrl"><label>Duration</label><input type="range" id="s-ns" min="480" max="720" value="600" step="15"><span class="val" id="v-ns"></span></div>
+      <div class="ctrl">
+        <label>Night feed</label>
+        <select id="s-nf" style="flex:1;font-family:'DM Sans',sans-serif;font-size:12px;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:3px 6px;cursor:pointer;outline:none;"></select>
+        <span class="val" id="v-nf" style="min-width:0"></span>
+      </div>
+    </div>
+
+    <div class="section">
+      <p class="section-title">Feeds</p>
+      <div id="feed-list"></div>
+      <button class="add-feed-btn" onclick="addFeed()">+ Add feed</button>
+    </div>
+
+  </aside>
+
+  <!-- Timeline -->
+  <main class="main">
+    <div id="tl-header" class="tl-header"></div>
+    <div id="tracks"></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-wake"></div> Awake</div>
+      <div class="legend-item"><div class="legend-swatch sw-nap"></div> Nap</div>
+      <div class="legend-item"><div class="legend-swatch sw-feed"></div> Feed</div>
+      <div class="legend-item"><div class="legend-swatch sw-night"></div> Night sleep</div>
+      <div class="legend-item"><div class="legend-swatch sw-nfeed"></div> Night feed</div>
+    </div>
+    <p class="note">
+      Feed times are anchored to wake events — they shift automatically when nap lengths change.<br>
+      Hover any block to see the exact time.
+    </p>
+  </main>
+
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const DISPLAY_START = 300;
+const DISPLAY_END   = 1740;
+const TOTAL         = DISPLAY_END - DISPLAY_START;
+
+function fmt(m) {
+  m = ((m % 1440) + 1440) % 1440;
+  const h = Math.floor(m / 60), mm = m % 60;
+  const ap = h < 12 ? 'am' : 'pm';
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${h12}:${String(mm).padStart(2,'0')} ${ap}`;
+}
+function fmtDur(m) {
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60), mm = m % 60;
+  return mm ? `${h}h ${mm}m` : `${h}h`;
+}
+function pct(m)  { return ((m - DISPLAY_START) / TOTAL) * 100; }
+function pctW(m) { return (m / TOTAL) * 100; }
+function gv(id)  { return +document.getElementById(id).value; }
+
+function getEvents() {
+  const wake = gv('s-wake');
+  const w1 = gv('s-w1'), w2 = gv('s-w2'), w3 = gv('s-w3'), w4 = gv('s-w4');
+  const n1 = gv('s-n1'), n2 = gv('s-n2'), n3 = gv('s-n3');
+  const ns = gv('s-ns');
+  // Night feed is an absolute clock time. If it's before noon (< 720 min),
+  // it falls in the early hours of the NEXT day, so add 1440 to place it correctly
+  // on the timeline which runs from 300 (5am) to 1740 (5am next day).
+  let nfTime = gv('s-nf');
+  if (nfTime < 720) nfTime += 1440;
+
+  const nap1s = wake + w1,  nap1e = nap1s + n1;
+  const nap2s = nap1e + w2, nap2e = nap2s + n2;
+  const nap3s = nap2e + w3, nap3e = nap3s + n3;
+  const beds  = nap3e + w4, bede  = beds + ns;
+
+  return {
+    wake, w1, w2, w3, w4, n1, n2, n3, ns,
+    nap1s, nap1e, nap2s, nap2e, nap3s, nap3e,
+    beds, bede, nfTime,
+    anchors: [
+      { label: 'Wake',   time: wake },
+      { label: 'Nap 1',  time: nap1e },
+      { label: 'Nap 2',  time: nap2e },
+      { label: 'Nap 3',  time: nap3e },
+    ]
+  };
+}
+
+let feeds = [
+  { anchor: 0, dir: 'after', offset: 5 },
+  { anchor: 1, dir: 'after', offset: 5 },
+  { anchor: 2, dir: 'after', offset: 5 },
+  { anchor: 3, dir: 'after', offset: 5 },
+];
+
+function feedTime(f, ev) {
+  return ev.anchors[f.anchor].time + (f.dir === 'after' ? f.offset : -f.offset);
+}
+
+// Tooltip
+const tooltip = document.getElementById('tooltip');
+function showTip(e, text) {
+  tooltip.textContent = text;
+  tooltip.style.opacity = '1';
+  moveTip(e);
+}
+function moveTip(e) {
+  tooltip.style.left = (e.clientX + 12) + 'px';
+  tooltip.style.top  = (e.clientY - 28) + 'px';
+}
+function hideTip() { tooltip.style.opacity = '0'; }
+
+function renderFeedList(ev) {
+  const list = document.getElementById('feed-list');
+  list.innerHTML = '';
+  feeds.forEach((f, i) => {
+    const div = document.createElement('div');
+    div.className = 'feed-item';
+
+    const dirSel = document.createElement('select');
+    ['after','before'].forEach(d => {
+      const o = document.createElement('option');
+      o.value = d; o.textContent = d;
+      if (d === f.dir) o.selected = true;
+      dirSel.appendChild(o);
+    });
+    dirSel.onchange = () => { feeds[i].dir = dirSel.value; update(); };
+
+    const ancSel = document.createElement('select');
+    ev.anchors.forEach((a, ai) => {
+      const o = document.createElement('option');
+      o.value = ai; o.textContent = a.label;
+      if (ai === f.anchor) o.selected = true;
+      ancSel.appendChild(o);
+    });
+    ancSel.onchange = () => { feeds[i].anchor = +ancSel.value; update(); };
+
+    const offLabel = document.createElement('span');
+    offLabel.className = 'feed-offset';
+    offLabel.textContent = f.offset + 'm';
+
+    const sl = document.createElement('input');
+    sl.type = 'range'; sl.min = 0; sl.max = 60; sl.step = 5; sl.value = f.offset;
+    sl.oninput = () => { feeds[i].offset = +sl.value; update(); };
+
+    const timeLabel = document.createElement('span');
+    timeLabel.className = 'feed-time';
+    timeLabel.textContent = fmt(feedTime(f, ev));
+
+    const del = document.createElement('button');
+    del.className = 'feed-del';
+    del.textContent = '×';
+    del.title = 'Remove this feed';
+    del.onclick = () => { feeds.splice(i, 1); update(); };
+
+    div.appendChild(dirSel);
+    div.appendChild(ancSel);
+    div.appendChild(sl);
+    div.appendChild(offLabel);
+    div.appendChild(timeLabel);
+    div.appendChild(del);
+    list.appendChild(div);
+  });
+}
+
+function addFeed() {
+  feeds.push({ anchor: 0, dir: 'after', offset: 0 });
+  update();
+}
+
+function buildRuler(ev) {
+  const hdr = document.getElementById('tl-header');
+  hdr.innerHTML = '';
+  for (let t = DISPLAY_START; t <= DISPLAY_END; t += 60) {
+    const d = document.createElement('div');
+    d.className = 'tl-tick';
+    d.style.width = pctW(60) + '%';
+    d.textContent = fmt(t);
+    hdr.appendChild(d);
+  }
+}
+
+function makeTrack(label, fn) {
+  const row = document.createElement('div');
+  row.className = 'tl-row';
+
+  const lbl = document.createElement('div');
+  lbl.className = 'tl-label';
+  lbl.textContent = label;
+  row.appendChild(lbl);
+
+  const body = document.createElement('div');
+  body.className = 'tl-body';
+
+  for (let t = DISPLAY_START + 60; t < DISPLAY_END; t += 60) {
+    const line = document.createElement('div');
+    line.className = 'tl-grid-line';
+    line.style.left = pct(t) + '%';
+    body.appendChild(line);
+  }
+
+  fn(body);
+  row.appendChild(body);
+  return row;
+}
+
+function placeBlock(body, start, end, cls, label, tipText) {
+  const s = Math.max(start, DISPLAY_START);
+  const e = Math.min(end,   DISPLAY_END);
+  if (e <= s) return;
+  const bl = document.createElement('div');
+  bl.className = 'tl-block ' + cls;
+  bl.style.left  = pct(s) + '%';
+  bl.style.width = Math.max(pctW(e - s), 0.3) + '%';
+  const wPct = pctW(e - s);
+  bl.textContent = wPct > 5 ? label : '';
+  const tip = tipText || `${fmt(start)} – ${fmt(end)}`;
+  bl.addEventListener('mouseenter', e => showTip(e, tip));
+  bl.addEventListener('mousemove',  moveTip);
+  bl.addEventListener('mouseleave', hideTip);
+  body.appendChild(bl);
+}
+
+function renderTimeline(ev) {
+  const tracks = document.getElementById('tracks');
+  tracks.innerHTML = '';
+
+  tracks.appendChild(makeTrack('awake', body => {
+    placeBlock(body, ev.wake,  ev.nap1s, 'b-wake', fmtDur(ev.w1),  `Awake: ${fmt(ev.wake)} – ${fmt(ev.nap1s)} (${fmtDur(ev.w1)})`);
+    placeBlock(body, ev.nap1e, ev.nap2s, 'b-wake', fmtDur(ev.w2),  `Awake: ${fmt(ev.nap1e)} – ${fmt(ev.nap2s)} (${fmtDur(ev.w2)})`);
+    placeBlock(body, ev.nap2e, ev.nap3s, 'b-wake', fmtDur(ev.w3),  `Awake: ${fmt(ev.nap2e)} – ${fmt(ev.nap3s)} (${fmtDur(ev.w3)})`);
+    placeBlock(body, ev.nap3e, ev.beds,  'b-wake', fmtDur(ev.w4),  `Awake: ${fmt(ev.nap3e)} – ${fmt(ev.beds)} (${fmtDur(ev.w4)})`);
+  }));
+
+  tracks.appendChild(makeTrack('naps', body => {
+    placeBlock(body, ev.nap1s, ev.nap1e, 'b-nap', `Nap 1 · ${fmtDur(ev.n1)}`, `Nap 1: ${fmt(ev.nap1s)} – ${fmt(ev.nap1e)}`);
+    placeBlock(body, ev.nap2s, ev.nap2e, 'b-nap', `Nap 2 · ${fmtDur(ev.n2)}`, `Nap 2: ${fmt(ev.nap2s)} – ${fmt(ev.nap2e)}`);
+    placeBlock(body, ev.nap3s, ev.nap3e, 'b-nap', `Nap 3 · ${fmtDur(ev.n3)}`, `Nap 3: ${fmt(ev.nap3s)} – ${fmt(ev.nap3e)}`);
+  }));
+
+  if (feeds.length > 0) {
+    tracks.appendChild(makeTrack('feeds', body => {
+      feeds.forEach((f, i) => {
+        const t = feedTime(f, ev);
+        placeBlock(body, t, t + 15, 'b-feed', `F${i + 1}`, `Feed ${i + 1}: ${fmt(t)}`);
+      });
+    }));
+  }
+
+  tracks.appendChild(makeTrack('night', body => {
+    placeBlock(body, ev.beds,   ev.bede,   'b-night', `Night · ${fmtDur(ev.ns)}`, `Night sleep: ${fmt(ev.beds)} – ${fmt(ev.bede)}`);
+    placeBlock(body, ev.nfTime, ev.nfTime + 20, 'b-nfeed', 'Night feed', `Night feed: ${fmt(ev.nfTime)}`);
+  }));
+
+  // timestamp row
+  const tsRow = document.createElement('div');
+  tsRow.className = 'tl-row';
+  tsRow.style.height = '24px';
+  const tsSpacer = document.createElement('div');
+  tsSpacer.style.width = '88px'; tsSpacer.style.flexShrink = '0';
+  tsRow.appendChild(tsSpacer);
+  const tsBody = document.createElement('div');
+  tsBody.className = 'tl-body'; tsBody.style.height = '24px'; tsBody.style.position = 'relative';
+  [
+    [ev.wake,   '↑'],
+    [ev.nap1s,  'N1'],
+    [ev.nap1e,  '↑'],
+    [ev.nap2s,  'N2'],
+    [ev.nap2e,  '↑'],
+    [ev.nap3s,  'N3'],
+    [ev.nap3e,  '↑'],
+    [ev.beds,   'bed'],
+    [ev.nfTime, '🌙'],
+  ].forEach(([t, lbl]) => {
+    if (t < DISPLAY_START || t > DISPLAY_END) return;
+    const el = document.createElement('div');
+    el.style.cssText = `position:absolute;left:${pct(t)}%;top:0;font-size:9px;font-family:'DM Mono',monospace;color:var(--text3);transform:translateX(-50%);text-align:center;white-space:nowrap;line-height:1.3;`;
+    el.innerHTML = `${lbl}<br>${fmt(t)}`;
+    tsBody.appendChild(el);
+  });
+  tsRow.appendChild(tsBody);
+  tracks.appendChild(tsRow);
+}
+
+function updateLabels(ev) {
+  document.getElementById('v-wake').textContent = fmt(ev.wake);
+  document.getElementById('v-w1').textContent = fmtDur(ev.w1);
+  document.getElementById('v-w2').textContent = fmtDur(ev.w2);
+  document.getElementById('v-w3').textContent = fmtDur(ev.w3);
+  document.getElementById('v-w4').textContent = fmtDur(ev.w4);
+  document.getElementById('v-n1').textContent = fmtDur(ev.n1);
+  document.getElementById('v-n2').textContent = fmtDur(ev.n2);
+  document.getElementById('v-n3').textContent = fmtDur(ev.n3);
+  document.getElementById('v-ns').textContent = fmtDur(ev.ns);
+}
+
+function update() {
+  const ev = getEvents();
+  updateLabels(ev);
+  renderFeedList(ev);
+  buildRuler(ev);
+  renderTimeline(ev);
+}
+
+// Populate night feed time picker (every 15 min, midnight-to-midnight)
+// Default: 12:30am = 750 minutes
+(function() {
+  const sel = document.getElementById('s-nf');
+  const DEFAULT_NF = 30; // 12:30am = 30 minutes past midnight
+  for (let t = 0; t < 1440; t += 15) {
+    const opt = document.createElement('option');
+    opt.value = t;
+    opt.textContent = fmt(t);
+    if (t === DEFAULT_NF) opt.selected = true;
+    sel.appendChild(opt);
+  }
+  sel.onchange = update;
+})();
+
+document.querySelectorAll('input[type=range]').forEach(el => el.addEventListener('input', update));
+update();
+</script>
+</body>
+</html>
